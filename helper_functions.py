@@ -161,9 +161,9 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
         data['dailyrainin'] = str(daily_accum * 0.039370079)
         data['tempf'] = str(measurements['Temperature'].iloc[i] *1.8 + 32) # Converting Celsius to Fahrenheit
         data['humidity'] = str(measurements['Humidity'].iloc[i]) 
-        # response = requests.post(url, data=data)
-        # if response.status_code == 200:
-        if 1:
+        response = requests.post(url, data=data)
+        if response.status_code == 200:
+        # if 1:
             this_uploaded_data = pd.DataFrame({'location': location, 
                                                 'time': measurements['time_utc_rounded'].iloc[i], 
                                                 'Rain' : measurements['Rain'].iloc[i],

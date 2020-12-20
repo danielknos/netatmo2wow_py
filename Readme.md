@@ -34,3 +34,10 @@ no_of_days specifies how many days back the code goes to read data. If the uploa
 - upload_measurements(location, measurements, update_freq = '10min', timeshift_for_zero = 1)
 Uploads the data to wow. update_freq specifies the frequency of uploads. The code rounds all the data to closes update_freq time unit and either averages it (temp, humidity, wind) or sums it (sum_rain) depending on the parameter	
 - timeshift_for_zero. This specifies the number of hours from UTC the station is located. All times are in UTC but for accumulated rain it's set to 0 every new day and to make this in local time this can be shifted, for example to make it reset at midnight in CET instread of UTC use timeshift_for_zero = 1
+
+Every time the code is run the code saves a few files
+- Upload_log.csv - This timestamp and data for the last upload for this particular run. This can be used both as a sanity check but it is also used as the cutoff time for the next upload, so only newer observationst
+than the last log are used. For rainfall accumulation the last observation data point is also used as the current accumulated rain since this number needs to be added to the newer observations to get the correct daily accumulated rainfall. 
+If the log is removed then a new blank log is created which means then some observations might be reported twice to WOW, and the accumulated rainfall will be worng for that particular day
+- uploaded_data.csv - A list of all uploaded data points, this is overwritten every time the code is run
+- failed_data.csv - A list of all the data that failed to be uploaded (if any). This list does not inlcude data from netatmo that was from times before the priovus log time stamp
