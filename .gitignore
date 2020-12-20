@@ -1,0 +1,10 @@
+# Files to ignore
+.env
+.venv
+.vscode
+__pycache__
+*.csv
+user_inputs.json
+temp_auth.json
+tmp.py
+

@@ -1,0 +1,1 @@
+C:\Users\danie\netatmo2wow_py\.venv\Scripts\activate.bat
