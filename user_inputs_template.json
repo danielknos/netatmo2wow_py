@@ -1,0 +1,4 @@
+{"locations":[
+{"name":"your_name_of_station", "device_id":"netatmo_device_id_00:ee:20:11:00:a9", "client_id" : "netatmo_client_id", "client_secret": "netatmo_client_secret", "username":"netatmo_user_name", "password": "netatmo_password", "authentication_key": "wow_authentication_key_123456", "site_id": "wow_site_id"},
+{"name":"your_name_of_station", "device_id":"netatmo_device_id_00:ee:20:11:00:a9", "client_id" : "netatmo_client_id", "client_secret": "netatmo_client_secret", "username":"netatmo_user_name", "password": "netatmo_password", "authentication_key": "wow_authentication_key_123456", "site_id": "wow_site_id"}
+]}

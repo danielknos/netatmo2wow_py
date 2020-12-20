@@ -29,7 +29,6 @@ def get_token(location):
         ('username', credentials['username']),
         ('password', credentials['password'])    
     ]
-
     response = requests.post(url, data=data)
     ret_value = response.json()
     return ret_value
