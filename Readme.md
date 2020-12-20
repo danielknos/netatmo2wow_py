@@ -14,7 +14,7 @@ The code currently handles the following parameters
     - wind speed
 
 
-For the code to work the user needs to specify the station specific parameters in the json file user_inputs.json. These parameters can be found at the netatmo dev website and at the UK met office wow website
+For the code to work the user needs to specify the station specific parameters in the json file user_inputs_template and rename it to user_inputs.json. These parameters can be found at the netatmo dev website and at the UK met office wow website
 
 - name - Name of the station, this is specified by the user to keep the data separate if there are many stations
 - device_id - The adress of the netatmo main device, can be found at the Netatmo dev website and is unique by station
