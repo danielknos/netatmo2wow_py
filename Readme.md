@@ -41,3 +41,5 @@ than the last log are used. For rainfall accumulation the last observation data 
 If the log is removed then a new blank log is created which means then some observations might be reported twice to WOW, and the accumulated rainfall will be worng for that particular day
 - uploaded_data.csv - A list of all uploaded data points, this is overwritten every time the code is run
 - failed_data.csv - A list of all the data that failed to be uploaded (if any). This list does not inlcude data from netatmo that was from times before the priovus log time stamp
+
+If anything fails, feel free to email me at daniel.knos@gmail.com
