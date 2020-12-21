@@ -28,7 +28,7 @@ For the code to work the user needs to specify the station specific parameters i
 	
 The code sequentially calls 4 functions
 - get_token(location) - Gets authorization token for a station
-- station_data(location, token) - ets information about the station, mainly which parameters that exist
+- station_data(location, token) - Gets information about the station, mainly which parameters that exist
 - get_measurements(location, station_data, auth_token, frequency, no_of_days = 1, savedata = True) - Gets data for the station at location. Frequency is how often observations are read, specified by the Netatmo API. Available ones are 5min, 30min, 1hour etc.
 no_of_days specifies how many days back the code goes to read data. If the upload is done ones a day then there's no point going further back than 1 day because thw upload to wow only uploads the new numbers. Set savedata to TRUE to save all the loaded data in a csv file
 - upload_measurements(location, measurements, update_freq = '10min', timeshift_for_zero = 1)
