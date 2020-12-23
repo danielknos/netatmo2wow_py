@@ -18,4 +18,5 @@ def main(location):
 if __name__ == "__main__":
     # location = sys.argv[1]
     location = 'falhagen'
+    location = 'kalvsvik'
     main(location)

@@ -102,6 +102,11 @@ def get_measurements(location, station_data, auth_token, scale_in, no_of_days = 
         this_data_type = this_module['data_type']
         if 'Rain' in this_data_type:
             this_data_type.append('sum_rain') # No specific type exists for sum_rain so added manually if a rain gauge exists
+        if 'Wind' in this_data_type:
+            this_data_type.append('windstrength')
+            this_data_type.append('windangle')
+            this_data_type.append('guststrength')
+            this_data_type.append('gustangle')
         for j in range(0, len(this_data_type)):
             data={'access_token' : auth_token['access_token'],
                     'device_id': credentials['device_id'],
@@ -118,6 +123,7 @@ def get_measurements(location, station_data, auth_token, scale_in, no_of_days = 
                             '&date_end=' + str(end_time) +
                             '&access_token=' + auth_token['access_token'])
             response = requests.post(url, data=data)
+            print(detailed_url)
             if response.status_code == 200:
                 request = urllib.request.urlopen(detailed_url)
                 if platform.system() == 'Windows':
@@ -165,28 +171,28 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
     url = 'http://wow.metoffice.gov.uk/automaticreading?'    
     if os.path.isfile('upload_log.csv'):
         # Reading the old log if it exists
-        log_exist = True
         upload_log_last = pd.read_csv('upload_log.csv')
         this_log = upload_log_last[upload_log_last.location == location]
-        
-        # Finds the last accumulated rainfall if it exists
-        if 'sum_rain' in this_log.columns:
-            current_max_accum_rainfall = this_log[['time', 'sum_rain']]
-            current_max_accum_rainfall['date'] = pd.to_datetime(current_max_accum_rainfall['time'])
-            current_max_accum_rainfall['date'] = current_max_accum_rainfall['date'].dt.date
-            current_max_accum_rainfall = current_max_accum_rainfall[['date','time', 'sum_rain']]
-            last_time_per_date = current_max_accum_rainfall.groupby('date').time.max().reset_index()
-            max_accum_rainfall = last_time_per_date.merge(current_max_accum_rainfall)
+        if (this_log.shape[0] > 0):
+            # Finds the last accumulated rainfall if it exists
+            if ('sum_rain' in this_log.columns):
+                current_max_accum_rainfall = this_log[['time', 'sum_rain']]
+                current_max_accum_rainfall['date'] = pd.to_datetime(current_max_accum_rainfall['time'])
+                current_max_accum_rainfall['date'] = current_max_accum_rainfall['date'].dt.date
+                current_max_accum_rainfall = current_max_accum_rainfall[['date','time', 'sum_rain']]
+                last_time_per_date = current_max_accum_rainfall.groupby('date').time.max().reset_index()
+                max_accum_rainfall = last_time_per_date.merge(current_max_accum_rainfall)
 
+            else:
+                max_accum_rainfall = pd.DataFrame({}, columns=['date', 'sum_rain'], index = [0])
+            # Filters out the observaitons that are valid for times after the last upload
+            measurements = measurements[measurements.time_utc > max(this_log['time'])]
         else:
             max_accum_rainfall = pd.DataFrame({}, columns=['date', 'sum_rain'], index = [0])
-        # Filters out the observaitons that are valid for times after the last upload
-        measurements = measurements[measurements.time_utc > max(this_log['time'])]
         measurements.to_csv('uploading_measurements.csv')
     else:
         upload_log_last = pd.DataFrame({}, columns=['location', 'time','Rain','Temperature', 'Humidity', 'Wind', 'sum_rain'], index = [0])
         max_accum_rainfall = pd.DataFrame({}, columns=['date', 'sum_rain'], index = [0])
-        log_exist = False
     
     measurements['time_utc_rounded'] = measurements['time_utc'].dt.round(update_freq)
     measurements = measurements[['time_utc_rounded', 'location', 'netatmo_param', 'value']]
@@ -194,10 +200,12 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
     all_param = measurements.netatmo_param.unique()
     first_param = 1
     for i in range(0, len(all_param)):
-        if all_param[i] in ['Temperature', 'Humidity', 'Wind']:
+        if all_param[i] in ['Temperature', 'Humidity', 'windstrength', 'windangle', 'gustangle']:
             df = pd.pivot_table(measurements[measurements.netatmo_param == all_param[i]], values=['value'], index=['time_utc_rounded'], columns = 'netatmo_param', aggfunc=np.mean)    
         elif all_param[i] in ['Rain', 'sum_rain']:
             df = pd.pivot_table(measurements[measurements.netatmo_param == all_param[i]], values=['value'], index=['time_utc_rounded'], columns = 'netatmo_param', aggfunc=np.sum)    
+        elif all_param[i] in ['guststrength']:
+            df = pd.pivot_table(measurements[measurements.netatmo_param == all_param[i]], values=['value'], index=['time_utc_rounded'], columns = 'netatmo_param', aggfunc=np.max)    
         if first_param:
             df_all = df
             first_param = 0
@@ -234,6 +242,7 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
         data['dateutc'] = str(measurements['time_utc_rounded'].iloc[i]).replace(':', '%3A').replace(' ', '+')
         this_data = pd.DataFrame({'location':location,
                                     'time': measurements['time_utc_rounded'].iloc[i]}, index = [0])
+        
         if 'Rain' in measurements.columns:
             data['rainin'] = str(measurements['Rain'].iloc[i] * 0.039370079) # Converting mm to inches
             data['dailyrainin'] = str(daily_accum * 0.039370079)
@@ -245,6 +254,18 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
         if 'Humidity' in measurements.columns:
             data['humidity'] = str(measurements['Humidity'].iloc[i]) 
             this_data['Humidity'] = measurements['Humidity'].iloc[i]
+        if 'windstrength' in measurements.columns:
+            data['windstrength'] = str(measurements['windstrength'].iloc[i] * 2.23693629)  # Converting m/s to mph
+            this_data['windstrength'] = measurements['windstrength'].iloc[i]
+        if 'guststrength' in measurements.columns:
+            data['guststrength'] = str(measurements['guststrength'].iloc[i] * 2.23693629)  # Converting m/s to mph
+            this_data['guststrength'] = measurements['guststrength'].iloc[i]
+        if 'windangle' in measurements.columns:
+            data['windangle'] = str(measurements['windangle'].iloc[i])  # Converting m/s to mph
+            this_data['windangle'] = measurements['windangle'].iloc[i]
+        if 'gustangle' in measurements.columns:
+            data['gustangle'] = str(measurements['gustangle'].iloc[i])  # Converting m/s to mph
+            this_data['gustangle'] = measurements['gustangle'].iloc[i]
         response = requests.post(url, data=data)
         if response.status_code == 200:
         # if 1:
@@ -252,10 +273,11 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
         else:
             failed_data = failed_data.append(this_data)
     
-    uploaded_data.to_csv('uploaded_data.csv')
-    failed_data.to_csv('failed_data.csv')
+    uploaded_data.to_csv('uploaded_data.csv', index = False)
+    failed_data.to_csv('failed_data.csv', index = False)
     tmp = uploaded_data
     tmp = tmp.groupby(tmp['time'].dt.date).last().reset_index(drop=True)
+    
     upload_log_new = upload_log_last.append(tmp)    
     upload_log_new['time'] = pd.to_datetime(upload_log_new['time'])
     upload_log_new.to_csv('upload_log.csv', index = False)
