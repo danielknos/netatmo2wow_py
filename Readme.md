@@ -10,8 +10,10 @@ The code currently handles the following parameters
     - pressure
     - accumulated rainfall
     - rainfall intensity
-    - wind direction (not completed, had issues with my own station so have not been able to test)
-    - wind speed (not completed, had issues with my own station so have not been able to test)
+    - wind direction
+    - wind speed
+    - gust direction
+    - gust speed
 
 
 For the code to work the user needs to specify the station specific parameters in the json file user_inputs_template and rename it to user_inputs.json. These parameters can be found after registering an app at the netatmo dev website (https://dev.netatmo.com/) and registering the site at the UK met office wow website (https://wow.metoffice.gov.uk/)
