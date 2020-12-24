@@ -255,16 +255,16 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
             data['humidity'] = str(measurements['Humidity'].iloc[i]) 
             this_data['Humidity'] = measurements['Humidity'].iloc[i]
         if 'windstrength' in measurements.columns:
-            data['windstrength'] = str(measurements['windstrength'].iloc[i] * 2.23693629)  # Converting m/s to mph
+            data['windspeedmph'] = str(measurements['windstrength'].iloc[i] * 2.23693629)  # Converting m/s to mph
             this_data['windstrength'] = measurements['windstrength'].iloc[i]
         if 'guststrength' in measurements.columns:
-            data['guststrength'] = str(measurements['guststrength'].iloc[i] * 2.23693629)  # Converting m/s to mph
+            data['wingustmph'] = str(measurements['guststrength'].iloc[i] * 2.23693629)  # Converting m/s to mph
             this_data['guststrength'] = measurements['guststrength'].iloc[i]
         if 'windangle' in measurements.columns:
-            data['windangle'] = str(measurements['windangle'].iloc[i])  # Converting m/s to mph
+            data['winddir'] = str(measurements['windangle'].iloc[i])  # Converting m/s to mph
             this_data['windangle'] = measurements['windangle'].iloc[i]
         if 'gustangle' in measurements.columns:
-            data['gustangle'] = str(measurements['gustangle'].iloc[i])  # Converting m/s to mph
+            data['windgustdir'] = str(measurements['gustangle'].iloc[i])  # Converting m/s to mph
             this_data['gustangle'] = measurements['gustangle'].iloc[i]
         response = requests.post(url, data=data)
         if response.status_code == 200:
