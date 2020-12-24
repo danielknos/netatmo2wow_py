@@ -258,7 +258,7 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
             data['windspeedmph'] = str(measurements['windstrength'].iloc[i] * 2.23693629)  # Converting m/s to mph
             this_data['windstrength'] = measurements['windstrength'].iloc[i]
         if 'guststrength' in measurements.columns:
-            data['wingustmph'] = str(measurements['guststrength'].iloc[i] * 2.23693629)  # Converting m/s to mph
+            data['windgustmph'] = str(measurements['guststrength'].iloc[i] * 2.23693629)  # Converting m/s to mph
             this_data['guststrength'] = measurements['guststrength'].iloc[i]
         if 'windangle' in measurements.columns:
             data['winddir'] = str(measurements['windangle'].iloc[i])  # Converting m/s to mph
