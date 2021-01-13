@@ -17,6 +17,5 @@ def main(location):
 
 if __name__ == "__main__":
     # location = sys.argv[1]
-    location = 'falhagen'
-    location = 'kalvsvik'
+    location = 'name_of_location_in_user_inputs.json'
     main(location)
