@@ -91,15 +91,21 @@ def get_measurements(location, station_data, auth_token, scale_in, no_of_days = 
     """
     credentials = get_credentials(location)
     all_devices = station_data['body']['devices']
+    indoor_module = all_devices[0]
     all_modules = all_devices[0]['modules']
     end_time = time.time()
     start_time = end_time - no_of_days*24*3600
     all_datasets = pd.DataFrame(columns = ['time', 'value', 'netatmo_param'])
 
-    for i in range(0, len(all_modules)):
-        this_module = all_modules[i]
-        this_module_id = this_module['_id']
-        this_data_type = this_module['data_type']
+    for i in range(0, (len(all_modules) + 1)):
+        if i == (len(all_modules) + 0):
+            print(i)
+            this_module_id = indoor_module['_id']
+            this_data_type = ['Pressure']
+        else:
+            this_module = all_modules[i]
+            this_module_id = this_module['_id']
+            this_data_type = this_module['data_type']
         if 'Rain' in this_data_type:
             this_data_type.append('sum_rain') # No specific type exists for sum_rain so added manually if a rain gauge exists
         if 'Wind' in this_data_type:
@@ -191,7 +197,7 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
             max_accum_rainfall = pd.DataFrame({}, columns=['date', 'sum_rain'], index = [0])
         measurements.to_csv('uploading_measurements.csv')
     else:
-        upload_log_last = pd.DataFrame({}, columns=['location', 'time','Rain','Temperature', 'Humidity', 'Wind', 'sum_rain'], index = [0])
+        upload_log_last = pd.DataFrame({}, columns=['location', 'time','Rain','Temperature', 'Humidity', 'Wind', 'sum_rain', 'Pressure'], index = [0])
         max_accum_rainfall = pd.DataFrame({}, columns=['date', 'sum_rain'], index = [0])
     
     measurements['time_utc_rounded'] = measurements['time_utc'].dt.round(update_freq)
@@ -200,7 +206,7 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
     all_param = measurements.netatmo_param.unique()
     first_param = 1
     for i in range(0, len(all_param)):
-        if all_param[i] in ['Temperature', 'Humidity', 'windstrength', 'windangle', 'gustangle']:
+        if all_param[i] in ['Temperature', 'Humidity', 'windstrength', 'windangle', 'gustangle', 'Pressure']:
             df = pd.pivot_table(measurements[measurements.netatmo_param == all_param[i]], values=['value'], index=['time_utc_rounded'], columns = 'netatmo_param', aggfunc=np.mean)    
         elif all_param[i] in ['Rain', 'sum_rain']:
             df = pd.pivot_table(measurements[measurements.netatmo_param == all_param[i]], values=['value'], index=['time_utc_rounded'], columns = 'netatmo_param', aggfunc=np.sum)    
@@ -219,8 +225,8 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
     measurements = measurements.reset_index()
     measurements = measurements.sort_values(by=['time_utc_rounded'])     
 
-    uploaded_data = pd.DataFrame({}, columns=['location','time', 'Rain','sum_rain', 'Temperature', 'Humidity', 'Wind'], index = [0])
-    failed_data = pd.DataFrame({}, columns=['location','time', 'Rain','sum_rain', 'Temperature', 'Humidity', 'Wind'], index = [0])
+    uploaded_data = pd.DataFrame({}, columns=['location','time', 'Rain','sum_rain', 'Temperature', 'Humidity', 'Wind', 'Pressure'], index = [0])
+    failed_data = pd.DataFrame({}, columns=['location','time', 'Rain','sum_rain', 'Temperature', 'Humidity', 'Wind', 'Pressure'], index = [0])
     current_date = ''
     for i in tqdm(range(0, len(measurements))):
         if 'Rain' in measurements.columns:
@@ -266,6 +272,9 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
         if 'gustangle' in measurements.columns:
             data['windgustdir'] = str(measurements['gustangle'].iloc[i])  # Converting m/s to mph
             this_data['gustangle'] = measurements['gustangle'].iloc[i]
+        if 'Pressure' in measurements.columns:
+            data['baromin'] = str(measurements['Pressure'].iloc[i])  
+            this_data['Pressure'] = measurements['Pressure'].iloc[i]
         response = requests.post(url, data=data)
         if response.status_code == 200:
         # if 1:
