@@ -273,7 +273,7 @@ def upload_measurements(location, measurements, update_freq, timeshift_for_zero)
             data['windgustdir'] = str(measurements['gustangle'].iloc[i])  # Converting m/s to mph
             this_data['gustangle'] = measurements['gustangle'].iloc[i]
         if 'Pressure' in measurements.columns:
-            data['baromin'] = str(measurements['Pressure'].iloc[i])  
+            data['baromin'] = str(measurements['Pressure'].iloc[i] / 33.86) # Converting hPa to inch of mercury
             this_data['Pressure'] = measurements['Pressure'].iloc[i]
         response = requests.post(url, data=data)
         if response.status_code == 200:
