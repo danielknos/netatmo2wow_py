@@ -16,7 +16,5 @@ def main(location):
     upload_measurements(location, measurements, update_freq = '10min', timeshift_for_zero = 1)
 
 if __name__ == "__main__":
-    # location = sys.argv[1]
-    location = 'falhagen'
-    location = 'kalvsvik'
+    location = sys.argv[1]
     main(location)
